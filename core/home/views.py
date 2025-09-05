@@ -1,6 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from home.serializers import PeopleSerializer
+from home.models import *
 
 @api_view(['GET','POST','PUT'])
 def index(request):
@@ -24,3 +26,41 @@ def index(request):
         print('YOU HIT A PUT METHOD')
         return Response(courses)
     
+@api_view(['GET','POST','PUT','PATCH'])
+def person(request):
+    if request.method=='GET':
+        objs=Person.objects.all()
+        serializer=PeopleSerializer(objs,many=True)
+        return Response(serializer.data)
+    
+    elif request.method=='POST':
+        data=request.data
+        serializer=PeopleSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+    
+    elif request.method=='PUT':
+        data=request.data
+        serializer=PeopleSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+    
+    elif request.method=='PATCH':
+        data=request.data
+        obj=Person.objects.get(id=data['id'])
+        serializer=PeopleSerializer(data=data,partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+    
+    else:
+        data=request.data
+        obj=Person.objects.get(id=data['id'])
+        obj.delete()
+        return Response({'messgae':'Person Deleted'})
+
